@@ -22,7 +22,7 @@ wd.get(url)
 
 categories_xpath = '//div[contains(@class,"menu-categorias")]/ul[@class="categorias"]/li[contains(@class,"menu-productos")]'
 categories = wd.find_element(By.XPATH,categories_xpath)
-print (categories)
+print (size(categories))
 
 WebDriverWait(wd, timeout=5)
 
