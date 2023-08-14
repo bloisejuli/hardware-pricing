@@ -23,19 +23,45 @@ def get_page_parsed(url: str):
     return parsed_page
 
 
-#obtain_url_categories():
+def get_text_or_not_found(elements):
+    if elements:
+        return elements[0].text
+    else:
+        return "Not found"
+
+def extract_data(item):
+    discount_applied = get_text_or_not_found(item.xpath("span"))
+    product = get_text_or_not_found(item.xpath(".//h4/a"))
+    link = item.xpath("div/div[contains(@class,'overlay')]/a/@href")[0]
+    price_elements = item.xpath(".//div[contains(@class, 'price')]/h4/b")
+    price = get_text_or_not_found(price_elements)
+
+    return {
+        "Discount": discount_applied,
+        "Product": product,
+        "Price": price,
+        "Link": link
+    }
+
+def print_data(data_list):
+    for item_data in data_list:
+        print("Discount:", item_data["Discount"])
+        print("Product:", item_data["Product"])
+        print("Price:", item_data["Price"])
+        print("Link:", item_data["Link"])
+        print("-" * 20)
+
+
+
 page = get_page_parsed("https://www.mexx.com.ar/productos-rubro/notebooks/?all=1")
 items = page.xpath("//div[contains(@class,'listado-1 listados')]/div[contains(@class,'productos')]")
-print("CATEGORIEEEESS")
-for item in items:
-    discount_applied = item.xpath("span")[0].text
-    link = item.xpath("div/div[contains(@class,'overlay')]/a/@href")[0]
 
-    print(discount_applied)
-    print(link)
-    #url_item = []
-    #for item in items:
-    #    url_item.append(item.get("href"))
-    #return url_item
+data_list = []
+
+for item in items:
+    data = extract_data(item)
+    data_list.append(data)
+
+print_data(data_list)
 
 
