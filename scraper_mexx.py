@@ -47,7 +47,7 @@ def extract_data(item,category):
 
 
 if __name__ == '__main__':
-    categories = ['notebooks', 'motherboards', 'memorias-ram', 'procesadores','almacenamiento','placas-de-video','fuentes-de-poder','gabinetes','refrigeracion-pc','combos-actualizacion-pc','teclados-mouses-y-pads','auriculares-y-microfonos-','camaras-web-e-ip','monitores','conectividad-y-redes','volantes-y-gamepads','outlet']
+    categories = ['notebooks', 'memorias-ram','placas-de-video','monitores','outlet']
     data_list = []
 
 
