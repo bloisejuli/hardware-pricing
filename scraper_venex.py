@@ -1,34 +1,7 @@
-import requests
-import lxml.html.soupparser as sp
 import pandas
 import datetime
 from my_sql_connector import create_engine_mysql
-
-def get_page_from_url(url: str):
-    session = requests.Session()
-    response = session.get(url, headers={
-        'User-Agent': ('Mozilla/5.0 (X11; Linux x86_64)'
-                    'AppleWebKit/537.36 (KHTML, like Gecko)'
-                    'Chrome/44.0.2403.157 Safari/537.36'),
-        'Accept-Language': 'en-US, en;q=0.5',
-        'Accept': '*/*',
-        'Connection': 'keep-alive'
-    })
-
-    data = response.content.decode('utf-8', 'replace')
-    return data
-
-def get_page_parsed(url: str):
-    page = get_page_from_url(url)
-    parsed_page = ''
-    parsed_page = sp.fromstring(page)
-    return parsed_page
-
-def get_text_or_not_found(elements):
-    if elements:
-        return elements[0].text
-    else:
-        return "Not found"
+from web_utils import get_text_or_not_found, get_page_parsed
 
 def extract_data(item,category):
     title = get_text_or_not_found(item.xpath(".//h3/a"))
@@ -70,15 +43,16 @@ if __name__ == '__main__':
     extract_data_from_categories(data_list, components, url + '/componentes-de-pc')
 
     df = pandas.DataFrame.from_records(data_list)
-    print(df)
 
     df.drop(df[(df["cash_price"] == 'Not found')].index, inplace=True)
-    print(df)
+
+    df.to_csv('venex.csv')
+
     engine = create_engine_mysql()
-    
+"""    
     try:
         df.to_sql("products", con=engine, if_exists='append', index=False)
         print("Datos insertados en la base de datos.")
     except Exception as e:
         print("Error:", e)
-
+"""
