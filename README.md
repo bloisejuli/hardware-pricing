@@ -24,4 +24,16 @@ Para instalar todas las bibliotecas que utilizamos, ejecuta el siguiente comando
 pip install -r requirements.txt
 
 ## Uso
-Los datos se almacenan en una base de datos en la tabla "products".
+Los datos se almacenan en una base de datos en la tabla "products", pero tambien creamos un csv de cada pagina.
+Escrapeamos dos paginas y para ambas nos encargamos de traer los datos para las categorias:
+- notebooks
+- memorias-ram
+- placas-de-video
+- monitores
+- outlet
+
+## Archivos
+* scraper_mexx.py: Se encarga de obtener los datos de la pagina https://www.mexx.com.ar/
+* scraper_venex.py: Se encarga de obtener los datos de la pagina https://www.venex.com.ar/
+* my_sql_connector.py: Se encarga de la crear la conexion con la base de datos
+* web_utils.py: Contiene las funciones que utilizamos para facilitar la obtención, el procesamiento y la extracción de información de páginas web.

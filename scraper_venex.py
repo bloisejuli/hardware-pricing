@@ -49,10 +49,10 @@ if __name__ == '__main__':
     df.to_csv('venex.csv')
 
     engine = create_engine_mysql()
-"""    
+   
     try:
         df.to_sql("products", con=engine, if_exists='append', index=False)
         print("Datos insertados en la base de datos.")
     except Exception as e:
         print("Error:", e)
-"""
+
