@@ -1,0 +1,6 @@
+datetime
+mysql-connector-python
+pandas
+requests
+requests
+sqlalchemy

@@ -4,6 +4,19 @@ from web_utils import get_text_or_not_found, get_page_parsed
 import datetime
 
 
+def get_mexx_data(categories):
+    data_list = []
+
+    for category in categories:
+        page = get_page_parsed(f'https://www.mexx.com.ar/productos-rubro/{category}/?all=1')
+        items = page.xpath("//div[contains(@class,'productos')]")
+        for item in items:
+            data = extract_data(item, category)
+            data_list.append(data)         
+
+    df = pandas.DataFrame.from_records(data_list)
+    return df
+
 def extract_data(item,category):
     title = get_text_or_not_found(item.xpath(".//h4/a"))
     link = item.xpath("div/div[contains(@class,'overlay')]/a/@href")[0]
@@ -24,15 +37,7 @@ if __name__ == '__main__':
     categories = ['notebooks', 'memorias-ram','placas-de-video','monitores','outlet']
     data_list = []
 
-
-    for category in categories:
-        page = get_page_parsed(f'https://www.mexx.com.ar/productos-rubro/{category}/?all=1')
-        items = page.xpath("//div[contains(@class,'productos')]")
-        for item in items:
-            data = extract_data(item, category)
-            data_list.append(data)         
-
-    df = pandas.DataFrame.from_records(data_list)
+    df = get_mexx_data(categories)
     df.to_csv('mexx.csv')
 
     engine = create_engine_mysql()

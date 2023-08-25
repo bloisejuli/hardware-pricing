@@ -1,0 +1,8 @@
+setup.py
+hardware-pricing/__init__.py
+hardware-pricing/web_utils.py
+hardware_pricing.egg-info/PKG-INFO
+hardware_pricing.egg-info/SOURCES.txt
+hardware_pricing.egg-info/dependency_links.txt
+hardware_pricing.egg-info/requires.txt
+hardware_pricing.egg-info/top_level.txt
