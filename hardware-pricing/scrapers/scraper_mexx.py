@@ -1,6 +1,7 @@
 import pandas
 from my_sql_connector import create_engine_mysql
-from web_utils import get_text_or_not_found, get_page_parsed
+from utils.web_utils import get_text_or_not_found, get_page_parsed
+from scraper_notebooks_mexx import extract_data_from_notebooks
 import datetime
 
 
@@ -38,7 +39,22 @@ if __name__ == '__main__':
     data_list = []
 
     df = get_mexx_data(categories)
-    df.to_csv('mexx.csv')
+    current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+    df['cash_price'] = df['cash_price'].str.replace('.', '', regex=False)
+    df['cash_price'] = df['cash_price'].str.replace(',', '.', regex=False)
+    df['cash_price'] = df['cash_price'].str.replace('[^0-9.]', '', regex=True).astype(float)
+    df['store'] = 'mexx'
+    new_order = ['category', 'title', 'cash_price', 'store', 'link', 'created_at']
+    df = df[new_order]
+    print(df)
+    df.to_csv(f'../data/mexx-{current_date}.csv')
+
+    df_notebooks = extract_data_from_notebooks(df[df['category'] == 'notebooks'])
+
+    new_column_order = [col for col in df_notebooks.columns if col != 'created_at'] + ['created_at']
+    df_notebooks = df_notebooks[new_column_order]
+
+    df_notebooks.to_csv(f'../data/mexx-notebooks-{current_date}.csv')
 
     engine = create_engine_mysql()
 
@@ -47,3 +63,7 @@ if __name__ == '__main__':
         print("Datos insertados en la base de datos.")
     except Exception as e:
         print("Error:", e)
+
+
+    
+

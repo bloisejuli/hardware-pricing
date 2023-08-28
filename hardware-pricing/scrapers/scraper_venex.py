@@ -1,11 +1,14 @@
 import pandas
 import datetime
 from my_sql_connector import create_engine_mysql
-from web_utils import get_text_or_not_found, get_page_parsed
+from utils.web_utils import get_text_or_not_found, get_page_parsed
+from scraper_notebooks_venex import extract_data_from_notebooks
+
 
 def extract_data(item,category):
     title = get_text_or_not_found(item.xpath(".//h3/a"))
-    link = item.xpath("//h3/a/@href")[0]
+    link = item.xpath(".//h3/a/@href")[0] if item.xpath(".//h3/a/@href") else None
+
     price_elements = item.xpath(".//span[@class='current-price']")
     cash_price = get_text_or_not_found(price_elements)
     current_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -45,8 +48,26 @@ if __name__ == '__main__':
     df = pandas.DataFrame.from_records(data_list)
 
     df.drop(df[(df["cash_price"] == 'Not found')].index, inplace=True)
+    df['cash_price'] = df['cash_price'].str.replace('[^0-9.]', '', regex=True).astype(float)
 
-    df.to_csv('venex.csv')
+    df['store'] = 'venex'
+    new_order = ['category', 'title', 'cash_price', 'store', 'link', 'created_at']
+    df = df[new_order]
+
+    df_notebooks = extract_data_from_notebooks(df[df['category'] == 'notebooks'])
+
+    print(df)
+
+    current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+    df.to_csv(f'../data/venex-{current_date}.csv')
+    
+    df_notebooks = extract_data_from_notebooks(df[df['category'] == 'notebooks'])
+
+    new_column_order = [col for col in df_notebooks.columns if col != 'created_at'] + ['created_at']
+    df_notebooks = df_notebooks[new_column_order]
+
+    df_notebooks.to_csv(f'../data/venex-notebooks-{current_date}.csv')
+
 
     engine = create_engine_mysql()
    
@@ -56,3 +77,5 @@ if __name__ == '__main__':
     except Exception as e:
         print("Error:", e)
 
+
+    
