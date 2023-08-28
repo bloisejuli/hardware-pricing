@@ -1,6 +1,6 @@
 import pandas
 import datetime
-from my_sql_connector import create_engine_mysql
+from database_connector.my_sql_connector import create_engine_mysql
 from utils.web_utils import get_text_or_not_found, get_page_parsed
 from scraper_notebooks_venex import extract_data_from_notebooks
 
