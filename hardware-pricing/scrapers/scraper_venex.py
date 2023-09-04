@@ -1,5 +1,6 @@
 import pandas as pd
 import datetime
+from database_connector.my_sql_connector import create_engine_mysql
 from utils.web_utils import get_text_or_not_found, get_page_parsed, save_dataframes_to_csv
 from scraper_notebooks_venex import extract_data_from_notebooks
 from typing import List, Dict, Union
@@ -89,6 +90,14 @@ def main() -> None:
     print(df_notebooks)
 
     save_dataframes_to_csv(df_venex, df_notebooks, 'venex')
+
+    engine = create_engine_mysql()
+   
+    try:
+        df.to_sql("products", con=engine, if_exists='append', index=False)
+        print("Datos insertados en la base de datos.")
+    except Exception as e:
+        print("Error:", e)
 
 if __name__ == '__main__':
     main()
