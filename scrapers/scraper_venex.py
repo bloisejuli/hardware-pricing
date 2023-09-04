@@ -94,7 +94,7 @@ def main() -> None:
     engine = create_engine_mysql()
    
     try:
-        df.to_sql("products", con=engine, if_exists='append', index=False)
+        df_venex.to_sql("products", con=engine, if_exists='append', index=False)
         print("Datos insertados en la base de datos.")
     except Exception as e:
         print("Error:", e)
