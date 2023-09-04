@@ -1,11 +1,43 @@
-import pandas
-from database_connector.my_sql_connector import create_engine_mysql
-from utils.web_utils import get_text_or_not_found, get_page_parsed
-from scraper_notebooks_mexx import extract_data_from_notebooks
+import pandas as pd
 import datetime
+from utils.web_utils import get_page_parsed, get_text_or_not_found, save_dataframes_to_csv
+from scraper_notebooks_mexx import extract_data_from_notebooks
+from typing import List, Dict
+from lxml.html import HtmlElement
 
+def extract_data(item: HtmlElement, category: str) -> Dict[str, str]:
+    """
+    Extrae información de un elemento de producto.
 
-def get_mexx_data(categories):
+    Args:
+        item (Any): Elemento HTML del producto.
+        category (str): Categoría del producto.
+
+    Returns:
+        Dict[str, str]: Diccionario con la información extraída.
+    """
+    title = get_text_or_not_found(item.xpath(".//h4/a"))
+    link = item.xpath("div/div[contains(@class,'overlay')]/a/@href")[0]
+    price_elements = item.xpath(".//div[contains(@class, 'price')]/h4/b")
+    cash_price = get_text_or_not_found(price_elements)
+
+    return {
+        "category": category,
+        "title": title,
+        "cash_price": cash_price,
+        "link": link
+    }
+
+def get_mexx_data(categories: List[str]) -> pd.DataFrame:
+    """
+    Obtiene datos de productos de la tienda Mexx.
+
+    Args:
+        categories (List[str]): Lista de categorías de productos.
+
+    Returns:
+        pd.DataFrame: DataFrame con los datos de productos.
+    """
     data_list = []
 
     for category in categories:
@@ -13,57 +45,50 @@ def get_mexx_data(categories):
         items = page.xpath("//div[contains(@class,'productos')]")
         for item in items:
             data = extract_data(item, category)
-            data_list.append(data)         
+            data_list.append(data)
 
-    df = pandas.DataFrame.from_records(data_list)
+    df = pd.DataFrame.from_records(data_list)
     return df
 
-def extract_data(item,category):
-    title = get_text_or_not_found(item.xpath(".//h4/a"))
-    link = item.xpath("div/div[contains(@class,'overlay')]/a/@href")[0]
-    price_elements = item.xpath(".//div[contains(@class, 'price')]/h4/b")
-    cash_price = get_text_or_not_found(price_elements)
-    current_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+def clean_df(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Limpia y transforma el DataFrame de productos.
 
-    return {
-        "category": category,
-        "title": title,
-        "cash_price": cash_price,
-        "link": link,
-        "created_at": current_date
-    }
+    Args:
+        df (pd.DataFrame): DataFrame a limpiar.
 
-
-if __name__ == '__main__':
-    categories = ['notebooks', 'memorias-ram','placas-de-video','monitores','outlet']
-    data_list = []
-
-    df = get_mexx_data(categories)
-    current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+    Returns:
+        pd.DataFrame: DataFrame limpio y transformado.
+    """
+    created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    df.drop(df[(df["cash_price"] == 'Not found')].index, inplace=True)
+    df.drop(df[(df["title"] == 'Not found')].index, inplace=True)
     df['cash_price'] = df['cash_price'].str.replace('.', '', regex=False)
     df['cash_price'] = df['cash_price'].str.replace(',', '.', regex=False)
     df['cash_price'] = df['cash_price'].str.replace('[^0-9.]', '', regex=True).astype(float)
+    df['title'] = df['title'].str.rstrip('#')
     df['store'] = 'mexx'
+    df['created_at'] = created_at
     new_order = ['category', 'title', 'cash_price', 'store', 'link', 'created_at']
     df = df[new_order]
-    print(df)
-    df.to_csv(f'../data/mexx-{current_date}.csv')
 
-    df_notebooks = extract_data_from_notebooks(df[df['category'] == 'notebooks'])
+    return df
 
-    new_column_order = [col for col in df_notebooks.columns if col != 'created_at'] + ['created_at']
-    df_notebooks = df_notebooks[new_column_order]
+def main() -> None:
+    """
+    Función principal del script.
+    """
+    categories = ['notebooks', 'memorias-ram', 'placas-de-video', 'monitores', 'outlet']
 
-    df_notebooks.to_csv(f'../data/mexx-notebooks-{current_date}.csv')
+    df = get_mexx_data(categories)
+    df_cleaned = clean_df(df)
 
-    engine = create_engine_mysql()
+    print(df_cleaned)
 
-    try:
-        df.to_sql("products", con=engine, if_exists='append', index=False)
-        print("Datos insertados en la base de datos.")
-    except Exception as e:
-        print("Error:", e)
+    df_notebooks = extract_data_from_notebooks(df_cleaned[df_cleaned['category'] == 'notebooks'])
+    print(df_notebooks)
 
+    save_dataframes_to_csv(df, df_notebooks, 'mexx')
 
-    
-
+if __name__ == '__main__':
+    main()
