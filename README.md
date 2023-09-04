@@ -45,7 +45,7 @@ De la categoria de notebooks traemos las caracteristicas más importantes para p
 * scrapers/utils/web_utils.py: Contiene las funciones que utilizamos para facilitar la obtención, el procesamiento y la extracción de información de páginas web.
 
 ## Ejecutar
-1. Ejecutar el archivo run.py que se encarga de ejecutar los scraper para obtner la información.
+1. Ejecutar el archivo run.py que se encarga de ejecutar los scraper para obtener la información.
 2. Ejecutar el archivo my_dash.py para poder visualizar los datos.
 
 ⚠️ **Advertencia:** El programa run.py puede tardar hasta 10 minutos en ejecutarse
