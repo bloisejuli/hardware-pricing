@@ -5,7 +5,7 @@ from dash import Dash, html, dcc, Output, Input, dash_table
 
 # ---- Data Loading and Processing ----
 
-folder_pattern = 'scrapers/data/*'
+folder_pattern = 'data/*'
 matching_folders = glob.glob(folder_pattern)
 
 dataframes_global = []

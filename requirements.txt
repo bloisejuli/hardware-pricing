@@ -1,5 +1,9 @@
 pandas
-mysql-connector-python
+plotly
+dash
 sqlalchemy
+lxml
+beautifulsoup4
+mysql-connector-python
 requests
 datetime
